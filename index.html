@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* bg-slate-50 */
+        }
+        
+        /* Fade-in animation for cards */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Tooltip for heatmap cells */
+        .heatmap-cell {
+            position: relative;
+        }
+        .heatmap-cell .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: #1e293b; /* bg-slate-800 */
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .heatmap-cell:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-5xl font-bold text-slate-900">Habit Dashboard</h1>
+            <p class="text-xl text-slate-500 mt-2">Monthly Progress for July 2025</p>
+        </header>
+
+        <div class="flex justify-center mb-10">
+            <div class="flex items-center space-x-6 p-3 bg-white rounded-full shadow-sm border border-slate-200">
+                <div class="flex items-center">
+                    <span class="w-5 h-5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 mr-2"></span>
+                    <span class="font-medium text-slate-600">Completed</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-5 h-5 rounded-full bg-slate-200 mr-2"></span>
+                    <span class="font-medium text-slate-600">Skipped</span>
+                </div>
+            </div>
+        </div>
+
+        <main id="dashboard-container" class="space-y-12">
+            <!-- User data will be injected here by JavaScript -->
+        </main>
+    </div>
+
+    <script>
+        // The JSON data from 'habit_tracker_simulation_5users_30days.json' is embedded here.
+        const habitData = [
+          { "date": "2025-07-01", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-01", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-01", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-01", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-01", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": false }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": false } ] },
+          { "date": "2025-07-02", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-02", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-02", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": false }, { "habit": "Walk 10k Steps", "completed": false } ] },
+          { "date": "2025-07-02", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-02", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-03", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-03", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-03", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-03", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-03", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-04", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-04", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-04", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false }, { "habit": "Walk 10k Steps", "completed": false } ] },
+          { "date": "2025-07-04", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": false }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-04", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": false }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-05", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-05", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-05", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-05", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-05", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": false }, { "habit": "Exercise", "completed": false }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-06", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-06", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-06", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-06", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-06", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-07", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-07", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-07", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": false } ] },
+          { "date": "2025-07-07", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-07", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": false }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-08", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-08", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-08", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-08", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": false }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-08", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": false } ] },
+          { "date": "2025-07-09", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-09", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-09", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false }, { "habit": "Walk 10k Steps", "completed": false } ] },
+          { "date": "2025-07-09", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-09", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": false } ] },
+          { "date": "2025-07-10", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-10", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-10", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": false } ] },
+          { "date": "2025-07-10", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-10", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-11", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-11", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-11", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": false } ] },
+          { "date": "2025-07-11", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-11", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-12", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-12", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-12", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-12", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-12", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": false }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-13", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-13", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-13", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-13", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-13", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": false }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-14", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-14", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-14", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-14", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": false } ] },
+          { "date": "2025-07-14", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": false } ] },
+          { "date": "2025-07-15", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-15", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-15", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": false } ] },
+          { "date": "2025-07-15", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-15", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": false }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-16", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-16", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-16", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": false }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-16", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-16", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-17", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-17", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-17", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-17", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-17", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": false } ] },
+          { "date": "2025-07-18", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-18", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-18", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-18", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": false }, { "habit": "Exercise", "completed": false } ] },
+          { "date": "2025-07-18", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": false }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-19", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-19", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-19", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-19", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-19", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": false } ] },
+          { "date": "2025-07-20", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-20", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-20", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-20", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-20", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": false }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-21", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-21", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-21", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-21", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": false }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-21", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-22", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-22", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-22", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-22", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": false }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-22", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": false }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-23", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-23", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-23", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false }, { "habit": "Walk 10k Steps", "completed": false } ] },
+          { "date": "2025-07-23", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": false }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-23", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": false } ] },
+          { "date": "2025-07-24", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-24", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-24", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-24", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": false } ] },
+          { "date": "2025-07-24", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-25", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-25", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-25", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-25", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-25", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-26", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-26", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": false }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-26", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-26", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": false } ] },
+          { "date": "2025-07-26", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-27", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-27", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-27", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": false } ] },
+          { "date": "2025-07-27", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": false }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-27", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": false }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-28", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-28", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-28", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-28", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-28", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": false }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": true } ] },
+          { "date": "2025-07-29", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-29", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-29", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-29", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": true }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-29", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": true }, { "habit": "Exercise", "completed": true }, { "habit": "Meditate", "completed": false } ] },
+          { "date": "2025-07-30", "user": "user_1", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": false } ] },
+          { "date": "2025-07-30", "user": "user_2", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true } ] },
+          { "date": "2025-07-30", "user": "user_3", "daily_log": [ { "habit": "Read", "completed": true }, { "habit": "Drink Water", "completed": true }, { "habit": "Walk 10k Steps", "completed": true } ] },
+          { "date": "2025-07-30", "user": "user_4", "daily_log": [ { "habit": "Drink Water", "completed": false }, { "habit": "Exercise", "completed": true } ] },
+          { "date": "2025-07-30", "user": "user_5", "daily_log": [ { "habit": "Walk 10k Steps", "completed": false }, { "habit": "Exercise", "completed": false }, { "habit": "Meditate", "completed": false } ] }
+        ];
+
+        // Helper function to get an icon for a habit
+        const getHabitIcon = (habitName) => {
+            const icons = {
+                'Read': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>`,
+                'Drink Water': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 22s-4.2-2.8-6-5"></path></svg>`,
+                'Walk 10k Steps': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M5 22l4-2-1-3-3.5 1.5L2 16l3-1 1 4 2.5-1.5L12 22l2.5-1.5L17 22l3-1-2.5-6L22 13l-1.5-4.5L17 10l-1-4-3 1-3-4-3 4-1-4-4 2Z"></path></svg>`,
+                'Exercise': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"></path><path d="m15.7 15.7-2.1-2.1"></path><path d="M8.3 8.3l2.1 2.1"></path><path d="m15.7 8.3-2.1 2.1"></path><path d="M8.3 15.7l2.1-2.1"></path></svg>`,
+                'Meditate': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M4 12a8 8 0 0 1 16 0Z"></path><path d="M12 22v-2"></path><path d="M12 4V2"></path><path d="M20 12h2"></path><path d="M2 12h2"></path><path d="m19.07 4.93-1.41 1.41"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 19.07-1.41-1.41"></path><path d="m6.34 6.34-1.41-1.41"></path></svg>`
+            };
+            return icons[habitName] || '';
+        };
+
+        // Helper function to get color based on success rate
+        const getRateColor = (rate) => {
+            if (rate >= 75) return 'text-emerald-500';
+            if (rate >= 50) return 'text-amber-500';
+            return 'text-rose-500';
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Process the raw data into a more usable format
+            const processedData = {};
+            habitData.forEach(entry => {
+                const { user, daily_log } = entry;
+                if (!processedData[user]) {
+                    processedData[user] = {};
+                }
+                daily_log.forEach(log => {
+                    if (!processedData[user][log.habit]) {
+                        processedData[user][log.habit] = [];
+                    }
+                    processedData[user][log.habit].push(log.completed);
+                });
+            });
+
+            // 2. Get the main container to inject HTML into
+            const container = document.getElementById('dashboard-container');
+
+            // 3. Loop through the processed data to build the dashboard
+            let animationDelay = 0;
+            for (const user in processedData) {
+                // Create a container for the user
+                const userCard = document.createElement('div');
+                userCard.className = 'bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-200 fade-in';
+                userCard.style.animationDelay = `${animationDelay}s`;
+                animationDelay += 0.1;
+
+                // Add user title
+                const userTitle = document.createElement('h2');
+                userTitle.className = 'text-3xl font-bold mb-8 text-slate-800 capitalize';
+                userTitle.textContent = user.replace('_', ' ');
+                userCard.appendChild(userTitle);
+
+                const habitsContainer = document.createElement('div');
+                habitsContainer.className = 'space-y-8';
+
+                for (const habit in processedData[user]) {
+                    const habitLog = processedData[user][habit];
+                    const daysCompleted = habitLog.filter(Boolean).length;
+                    const successRate = ((daysCompleted / habitLog.length) * 100);
+
+                    // Create habit section
+                    const habitSection = document.createElement('div');
+                    
+                    const habitHeader = document.createElement('div');
+                    habitHeader.className = 'flex justify-between items-center mb-3';
+
+                    const habitTitleContainer = document.createElement('div');
+                    habitTitleContainer.className = 'flex items-center gap-3';
+                    
+                    const iconContainer = document.createElement('div');
+                    iconContainer.className = 'text-slate-400';
+                    iconContainer.innerHTML = getHabitIcon(habit);
+                    
+                    const habitTitle = document.createElement('h3');
+                    habitTitle.className = 'text-xl font-semibold text-slate-700';
+                    habitTitle.textContent = habit;
+
+                    habitTitleContainer.appendChild(iconContainer);
+                    habitTitleContainer.appendChild(habitTitle);
+                    
+                    const habitStats = document.createElement('span');
+                    habitStats.className = `text-lg font-bold ${getRateColor(successRate)}`;
+                    habitStats.textContent = `${successRate.toFixed(1)}%`;
+
+                    habitHeader.appendChild(habitTitleContainer);
+                    habitHeader.appendChild(habitStats);
+                    habitSection.appendChild(habitHeader);
+
+                    // Create heatmap grid
+                    const heatmap = document.createElement('div');
+                    heatmap.className = 'grid grid-cols-10 sm:grid-cols-15 md:grid-cols-30 gap-1.5';
+                    
+                    // Add day cells to the heatmap
+                    habitLog.forEach((completed, index) => {
+                        const dayCell = document.createElement('div');
+                        dayCell.className = 'heatmap-cell w-full h-7 rounded-md transition-transform duration-200 hover:scale-110';
+                        
+                        const dayStatus = document.createElement('div');
+                        dayStatus.className = `w-full h-full rounded-md ${completed ? 'bg-gradient-to-br from-cyan-400 to-blue-500' : 'bg-slate-200'}`;
+                        
+                        const tooltip = document.createElement('span');
+                        tooltip.className = 'tooltip-text';
+                        tooltip.textContent = `Day ${index + 1}: ${completed ? 'Completed' : 'Skipped'}`;
+                        
+                        dayCell.appendChild(dayStatus);
+                        dayCell.appendChild(tooltip);
+                        heatmap.appendChild(dayCell);
+                    });
+
+                    habitSection.appendChild(heatmap);
+                    habitsContainer.appendChild(habitSection);
+                }
+                userCard.appendChild(habitsContainer);
+                container.appendChild(userCard);
+            }
+        });
+    </script>
+</body>
+</html>
